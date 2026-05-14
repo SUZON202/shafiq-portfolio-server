@@ -1,14 +1,22 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken'); // 🔴 ১. JWT ইমপোর্ট করা হলো
+const jwt = require('jsonwebtoken'); 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// মিডলওয়্যার
-app.use(cors());
+// মিডলওয়্যার (CORS ঠিক করা হয়েছে লাইভ সার্ভারের জন্য)
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'https://shafiq-suzon.web.app',
+        'https://shafiq-suzon.firebaseapp.com'
+    ],
+    credentials: true
+}));
 app.use(express.json());
 
 // কানেকশন ইউআরআই
@@ -36,12 +44,12 @@ async function run() {
     const usersCollection = db.collection("users");
     const projectsCollection = db.collection("projects");
     const messagesCollection = db.collection("messages");
+    const ordersCollection = db.collection("orders");
 
     // ==========================================
     //      🔴 SECURITY MIDDLEWARES (তালা-চাবি)
     // ==========================================
 
-    // টোকেন ভেরিফাই করার মিডলওয়্যার
     const verifyToken = (req, res, next) => {
         if (!req.headers.authorization) {
             return res.status(401).send({ message: 'unauthorized access' });
@@ -56,7 +64,6 @@ async function run() {
         })
     }
 
-    // অ্যাডমিন ভেরিফাই করার মিডলওয়্যার (আপনার স্পেশাল রিকুয়েস্ট)
     const verifyAdmin = async (req, res, next) => {
         const email = req.decoded.email;
         const query = { email: email };
@@ -69,7 +76,7 @@ async function run() {
     }
 
     // ==========================================
-    //                JWT API
+    //                 JWT API
     // ==========================================
     app.post('/jwt', async (req, res) => {
         const user = req.body;
@@ -81,7 +88,7 @@ async function run() {
     //                  APIs
     // ==========================================
 
-    // ১. ড্যাশবোর্ড স্ট্যাটাস দেখার API (লক করা হলো)
+    // ১. ড্যাশবোর্ড স্ট্যাটাস দেখার API
     app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
         try {
             const users = await usersCollection.countDocuments();
@@ -93,7 +100,7 @@ async function run() {
         }
     });
 
-    // ২. সব ইউজার দেখার API (লক করা হলো)
+    // ২. সব ইউজার দেখার API
     app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
         try {
             const result = await usersCollection.find().toArray();
@@ -119,7 +126,7 @@ async function run() {
         }
     });
 
-    // ৪. এডমিন বানানোর API (লক করা হলো)
+    // ৪. এডমিন বানানোর API
     app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
         try {
             const id = req.params.id;
@@ -132,7 +139,7 @@ async function run() {
         }
     });
 
-    // ৫. ইউজার এডমিন কি না চেক করা (AdminRoute এর জন্য জরুরি)
+    // ৫. ইউজার এডমিন কি না চেক করা
     app.get('/users/admin/:email', verifyToken, async (req, res) => {
         try {
             const email = req.params.email;
@@ -151,7 +158,7 @@ async function run() {
         }
     });
 
-    // ৬. ইউজার ডিলিট করার API (লক করা হলো)
+    // ৬. ইউজার ডিলিট করার API
     app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
         try {
             const id = req.params.id;
@@ -163,7 +170,19 @@ async function run() {
         }
     });
 
-    // PROJECT APIS (লক করা হলো)
+    // ==========================================
+    //               ORDERS APIS 
+    // ==========================================
+    app.get('/orders', verifyToken, verifyAdmin, async (req, res) => {
+        try {
+            const result = await ordersCollection.find().toArray();
+            res.send(result);
+        } catch (error) {
+            res.status(500).send({ message: "Error fetching orders" });
+        }
+    });
+
+    // PROJECT APIS
     app.get('/projects', async (req, res) => {
         try {
             const result = await projectsCollection.find().toArray();
