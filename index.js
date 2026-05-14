@@ -7,13 +7,14 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// মিডলওয়্যার (CORS ঠিক করা হয়েছে লাইভ সার্ভারের জন্য)
+// মিডলওয়্যার (CORS ঠিক করা হয়েছে আপনার লাইভ লিঙ্কের জন্য)
 app.use(cors({
     origin: [
         'http://localhost:5173',
         'http://localhost:5174',
         'https://shafiq-suzon.web.app',
-        'https://shafiq-suzon.firebaseapp.com'
+        'https://shafiq-suzon.firebaseapp.com',
+        'https://shafiq-portfolio-one.vercel.app' // আপনার আসল লাইভ লিঙ্কটি এখানে বসিয়ে দিলাম
     ],
     credentials: true
 }));
@@ -76,7 +77,7 @@ async function run() {
     }
 
     // ==========================================
-    //                 JWT API
+    //                JWT API
     // ==========================================
     app.post('/jwt', async (req, res) => {
         const user = req.body;
@@ -171,7 +172,7 @@ async function run() {
     });
 
     // ==========================================
-    //               ORDERS APIS 
+    //         ORDERS APIS 
     // ==========================================
     app.get('/orders', verifyToken, verifyAdmin, async (req, res) => {
         try {
