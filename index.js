@@ -14,7 +14,7 @@ app.use(cors({
         'http://localhost:5174',
         'https://shafiq-suzon.web.app',
         'https://shafiq-suzon.firebaseapp.com',
-        'https://shafiq-portfolio-one.vercel.app' // আপনার আসল লাইভ লিঙ্কটি এখানে বসিয়ে দিলাম
+        'https://shafiq-portfolio-beta.vercel.app' // আপনার আসল লাইভ লিঙ্কটি এখানে বসিয়ে দিলাম
     ],
     credentials: true
 }));
